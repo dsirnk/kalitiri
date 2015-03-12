@@ -1,0 +1,9 @@
+body { padding: 50px 0; }
+input + *[class*=remove] { position: absolute; right: 0; height: 100%; width: 50px; background-color: transparent; border: 1px solid transparent; z-index: 2; vertical-align: middle; cursor: pointer; }
+input[required]:not(:valid) + *[class*=remove] { display: none; }
+
+card[card] { border: 1px solid black; border-radius: 5px; padding: 0; }
+card[color=red] { color: red; border-color: red; }
+card:before,
+card:after { display: block; content: attr(card); padding: 5px; }
+card:after { margin-top: 70%; transform: rotateZ(180deg); }
