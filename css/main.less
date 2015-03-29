@@ -1,9 +1,17 @@
 body { padding: 50px 0; }
-input + *[class*=remove] { position: absolute; right: 0; height: 100%; width: 50px; background-color: transparent; border: 1px solid transparent; z-index: 2; vertical-align: middle; cursor: pointer; }
-input[required]:not(:valid) + *[class*=remove] { display: none; }
+input {
+	& + *[class*=remove] { position: absolute; right: 0; height: 100%; width: 50px; background-color: transparent; border: 1px solid transparent; z-index: 2; vertical-align: middle; cursor: pointer; }
+	&[plain] { background: transparent; border-color: transparent; box-shadow: none; outline: none; }
+	&[required]:not(:valid) + .glyphicon { display: none; }
+}
 
-card[card] { border: 1px solid black; border-radius: 5px; padding: 0; }
-card[color=red] { color: red; border-color: red; }
-card:before,
-card:after { display: block; content: attr(card); padding: 5px; }
-card:after { margin-top: 70%; transform: rotateZ(180deg); }
+summary, players, deck { margin-top: 15px; }
+deck { text-align: center; }
+card {
+	display: inline-block; width: 80px; height: 120px; margin: -110px 5px 10px -55px; position: relative; top: 110px; left: 30px; background: white; border: 1px solid black; border-radius: 5px; padding: 0; text-align: left;
+	&[color=red] { color: red; border-color: red; }
+	&[disabled] { background: grey; color: lightgrey; border-color: lightgrey; opacity: .75; }
+	&:before,
+	&:after { display: block; content: attr(card); padding: 5px; }
+	&:after { margin-top: 70%; transform: rotateZ(180deg); }
+}

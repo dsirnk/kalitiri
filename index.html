@@ -53,17 +53,38 @@
 		<div class="container">
 			<div class="row">
 				<players class="col-xs-12 col-sm-3">
-					<form ng-submit="Player.add(this)" class="has-feedback">
-						<input class="form-control" required placeholder="Player Name" ng-model="player" tabindex="1">
+					<summary class="clearfix">
+						<table class="table table-striped">
+							<tr>
+								<td class="text-right"> Players: </td>
+								<td><input ng-model="players.length" type="number" min="0" tabindex="2" plain /></td>
+							</tr>
+							<tr>
+								<td class="text-right"> Total Cards: </td>
+								<td> ({{cards.decks}}) {{cards.total}} </td>
+							</tr>
+							<tr>
+								<td class="text-right"> Hands:<br>Minimum: </td>
+								<td>{{cards.hands}}<br><input ng-model="cards.minHands" type="number" min="0" tabindex="2" plain /></td>
+							</tr>
+							<tr>
+								<td class="text-right"> Extra Cards:<br>Exclude: </td>
+								<td> {{cards.extra}}<br><input ng-model="cards.imp" min="0" tabindex="2" plain /></td>
+							</tr>
+						</table>
+					</summary>
+					<form ng-submit="players.add(this)" class="has-feedback">
+						<input ng-model="player" required tabindex="1" plain class="form-control" placeholder="Add Player" />
 						<button type="reset" class="glyphicon glyphicon-remove"></button>
 					</form>
-					<player ng-repeat="player in Player" class="has-feedback">
-						<input class="form-control" ng-readonly="readonly" ng-model="player.name" ng-init="readonly=true" ng-focus="readonly=false" ng-blur="readonly=true; !player.name.length ? Player.remove(this) : null;" tabindex="1" />
-						<button class="glyphicon glyphicon-remove" ng-click="Player.remove(this)"></button>
-					</player>
+					<form ng-repeat="player in players track by $index" class="has-feedback">
+						<input ng-model="player.name" ng-blur="!player.name.length ? players.remove(this) : null" tabindex="1" plain class="form-control" />
+						<button class="glyphicon glyphicon-remove" ng-click="players.remove(this)"></button>
+					</form>
 				</players>
 				<deck class="col-xs-12 col-sm-9">
-					<card class="col-xs-2" ng-repeat="card in Deck" card="{{card.sym}}{{card.symbol}}" color="{{card.color}}"></card>
+					<button class="btn btn-block btn-primary" ng-click="shuffle()">Shuffle</button>
+					<card ng-repeat="card in cards.stack.concat(cards.extras)" card="{{card.sym}}{{card.symbol}}" color="{{card.color}}" ng-disabled="{{card.extra}}"></card>
 				</deck>
 			</div>
 		</div>
@@ -78,41 +99,57 @@
 				angular
 					.module('kalitiri', [])
 					.controller('MainCtrl', function($scope) {
-						angular.extend($scope, {
-							console : 	console,
-							Player  : 	(function() {
-											console.log('loaded Player');
-											$scope.$watch('Player', function (newVal, oldVal) {
-											    if (newVal !== null && angular.isDefined(newVal) && newVal !== oldVal) {
-											        localStorage.Player = angular.toJson(newVal);
-											    }
-											}, true);
-											return angular.extend(angular.fromJson(localStorage.Player || '[]'), {
-												add   : function(p) { this.push({ name: p.player }); p.player = ''; },
-												remove: function(p) { this.splice(this.indexOf(p.player), 1); }
-											});
-										})(),
-							Deck    : 	(function(deck) {
-											var _suits     = [
-													{ 'symbol':'♠', 'suit': 'spades',   'color':'black' },
-													{ 'symbol':'♥', 'suit': 'hearts',   'color':'red'   },
-													{ 'symbol':'♦', 'suit': 'diamonds', 'color':'red'   },
-													{ 'symbol':'♣', 'suit': 'clubs',    'color':'black' }
-												],
-												_suitCards = 13,
-												_minCards  = 7,
-												_cards     = _suitCards * _suits.length;
-											for(var i = 1; i <= _cards; i++) {
-												var weight = i%_suitCards || _suitCards,
-													suit   = Math.ceil(i/_suitCards)-1;
-												deck.push(angular.extend({ weight: weight, sym: ({ '1':'A','11':'J','12':'Q','13':'K' }[weight] || weight) }, _suits[suit]));
-											}
-											return angular.extend(deck, {
-												// shuffle: function() { return this.sort(function() { return 0.5 - Math.random(); }); }
-											});
-										})([])
-						});
+						var suits 		= 	[
+												{ 'symbol':'♠', 'suit': 'spades',   'color':'black' },
+												{ 'symbol':'♥', 'suit': 'hearts',   'color':'red'   },
+												{ 'symbol':'♦', 'suit': 'diamonds', 'color':'red'   },
+												{ 'symbol':'♣', 'suit': 'clubs',    'color':'black' }
+											];
+						suits.cards 	= 	13;
 
+						$scope.players  = 	(function() {
+												return angular.extend(angular.fromJson(localStorage.players || '[]'), {
+													add   : function(p) { this.push({ name: p.player }); p.player = ''; },
+													remove: function(p) { this.splice(this.indexOf(p.player), 1); }
+												});
+											})();
+						$scope.cards    =   function() {
+												$scope.cards.decks = 0;
+												do {
+													$scope.cards.decks++;
+													$scope.cards.total = suits.cards * suits.length * $scope.cards.decks,
+													$scope.cards.extra = $scope.cards.total % ($scope.players.length || 1),
+													$scope.cards.hands = ($scope.cards.total - $scope.cards.extra) / ($scope.players.length || 1);
+
+												} while($scope.cards.hands < ($scope.cards.minHands = $scope.cards.minHands || parseInt(localStorage.minHands) || 7));
+
+												$scope.cards.stack  = [];
+												$scope.cards.extras = [];
+												$scope.cards.imp    = $scope.cards.imp || localStorage.impCards || 'A,3s';
+												for(var weight 	= 1, extra = $scope.cards.extra; weight <= suits.cards; weight++)
+												for(var sym 	= ({ '1':'A','11':'J','12':'Q','13':'K' }[weight] || weight),
+														suit 	= 0; suit < suits.length; suit++)
+												for(var deck 	= 0; deck < $scope.cards.decks; deck++) {
+													var inStack = ~($scope.cards.imp + ',').indexOf(sym + ',') ? true
+															: ~($scope.cards.imp + ',').indexOf(sym + suits[suit].suit[0]) ? true
+															: extra-- < 1;
+													$scope.cards[inStack ? 'stack' : 'extras'].push(angular.extend(
+														{
+															weight : weight,
+															sym    : sym,
+															extra  : !(inStack)
+														},
+														suits[suit]
+													));
+												}
+											};
+						$scope.shuffle 	=	function() { $scope.cards.stack.sort(function() { return 0.5 - Math.random(); }); };
+
+						$scope.$watch('[players, cards.minHands, cards.imp]', function (newVal, oldVal, scope) {
+						    angular.extend(localStorage, { players  : angular.toJson(newVal[0]), minHands : newVal[1], impCards : newVal[2] });
+						    $scope.cards();
+						}, true);
+						$scope.cards();
 					});
 			})(jQuery,window,document);
 		 </script>
