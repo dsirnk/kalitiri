@@ -57,7 +57,7 @@
 						<table class="table table-striped">
 							<tr>
 								<td class="text-right"> Players: </td>
-								<td><input ng-model="players.length" type="number" min="0" tabindex="2" plain /></td>
+								<td><input ng-model="players.length" type="number" min="0" tabindex="2" onfocus="this.select()" plain /></td>
 							</tr>
 							<tr>
 								<td class="text-right"> Total Cards: </td>
@@ -65,20 +65,20 @@
 							</tr>
 							<tr>
 								<td class="text-right"> Hands:<br>Minimum: </td>
-								<td>{{cards.hands}}<br><input ng-model="cards.minHands" type="number" min="0" tabindex="2" plain /></td>
+							  <td>{{cards.hands}}<br><input ng-model="cards.minHands" type="number" min="0" tabindex="2" onfocus="this.select()" plain /></td>
 							</tr>
 							<tr>
 								<td class="text-right"> Extra Cards:<br>Exclude: </td>
-								<td> {{cards.extra}}<br><input ng-model="cards.imp" min="0" tabindex="2" plain /></td>
+							  <td> {{cards.extra}}<br><input ng-model="cards.imp" min="0" tabindex="2" onfocus="this.select()" plain /></td>
 							</tr>
 						</table>
 					</summary>
 					<form ng-submit="players.add(this)" class="has-feedback">
-						<input ng-model="player" required tabindex="1" plain class="form-control" placeholder="Add Player" />
+					  <input ng-model="player" required tabindex="1" onfocus="this.select()" plain class="form-control" placeholder="Add Player" />
 						<button type="reset" class="glyphicon glyphicon-remove"></button>
 					</form>
 					<form ng-repeat="player in players track by $index" class="has-feedback">
-						<input ng-model="player.name" ng-blur="!player.name.length ? players.remove(this) : null" tabindex="1" plain class="form-control" />
+					  <input ng-model="player.name" ng-blur="!player.name.length ? players.remove(this) : null" tabindex="1" onfocus="this.select()" plain class="form-control" />
 						<button class="glyphicon glyphicon-remove" ng-click="players.remove(this)"></button>
 					</form>
 				</players>
