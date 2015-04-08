@@ -56,19 +56,19 @@
 					<summary class="clearfix">
 						<table class="table table-striped">
 							<tr>
-								<td class="text-right"> Players: </td>
+								<td class="text-right"> Players:</td>
 								<td><input ng-model="players.length" type="number" min="0" tabindex="2" onclick="this.select()" plain /></td>
 							</tr>
 							<tr>
-								<td class="text-right"> Total Cards: </td>
-								<td> ({{cards.decks}}) {{cards.total}} </td>
+								<td class="text-right"> Decks:<br>Cards:</td>
+								<td><input ng-model="cards.decks" type="number" min="1" max="3" tabindex="2" onclick="this.select()" plain /></br>{{cards.total}}</td>
 							</tr>
 							<tr>
-								<td class="text-right"> Hands:<br>Minimum: </td>
-							  <td>{{cards.hands}}<br><input ng-model="cards.minHands" type="number" min="0" tabindex="2" onclick="this.select()" plain /></td>
+								<td class="text-right"> Hands:</td>
+							  <td>{{cards.hands}}</td>
 							</tr>
 							<tr>
-								<td class="text-right"> Extra Cards:<br>Exclude: </td>
+								<td class="text-right"> Extra Cards:<br>Exclude:</td>
 							  <td> {{cards.extra}}<br><input ng-model="cards.imp" min="0" tabindex="2" onclick="this.select()" plain /></td>
 							</tr>
 						</table>
@@ -114,14 +114,10 @@
 												});
 											})();
 						$scope.cards    =   function() {
-												$scope.cards.decks = 0;
-												do {
-													$scope.cards.decks++;
-													$scope.cards.total = suits.cards * suits.length * $scope.cards.decks,
-													$scope.cards.extra = $scope.cards.total % ($scope.players.length || 1),
-													$scope.cards.hands = ($scope.cards.total - $scope.cards.extra) / ($scope.players.length || 1);
-
-												} while($scope.cards.hands < ($scope.cards.minHands = $scope.cards.minHands || parseInt(localStorage.minHands) || 7));
+												$scope.cards.decks = parseInt(localStorage.decks || 1);
+												$scope.cards.total = suits.cards * suits.length * $scope.cards.decks,
+												$scope.cards.extra = $scope.cards.total % ($scope.players.length || 1),
+												$scope.cards.hands = ($scope.cards.total - $scope.cards.extra) / ($scope.players.length || 1);
 
 												$scope.cards.stack  = [];
 												$scope.cards.extras = [];
@@ -145,8 +141,8 @@
 											};
 						$scope.shuffle 	=	function() { $scope.cards.stack.sort(function() { return 0.5 - Math.random(); }); };
 
-						$scope.$watch('[players, cards.minHands, cards.imp]', function (newVal, oldVal, scope) {
-						    angular.extend(localStorage, { players  : angular.toJson(newVal[0]), minHands : newVal[1], impCards : newVal[2] });
+						$scope.$watch('[players, cards.decks, cards.imp]', function (newVal, oldVal, scope) {
+						    angular.extend(localStorage, { players  : angular.toJson(newVal[0]), decks : newVal[1], impCards : newVal[2] });
 						    $scope.cards();
 						}, true);
 						$scope.cards();
