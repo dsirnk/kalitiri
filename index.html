@@ -34,38 +34,38 @@
 			</nav>
 			<div class="row">
 				<players class="col-xs-12 col-sm-3">
-					<summary class="clearfix">
-						<table class="table table-striped">
-							<tr>
-								<td class="text-right"> Players:</td>
-								<td><input ng-model="players.length" type="number" min="0" tabindex="2" onclick="this.select()" plain /></td>
-							</tr>
-							<tr>
-								<td class="text-right"> Decks:</td>
-								<td><input ng-model="decks" type="number" min="1" tabindex="2" onclick="this.select()" plain />({{cards.total}})</td>
-							</tr>
-							<tr>
-								<td class="text-right"> Hands:</td>
-							  	<td>{{cards.hands}}</td>
-							</tr>
-							<tr>
-								<td class="text-right"> Include:</td>
-							  	<td><input ng-model="include" min="0" tabindex="2" onclick="this.select()" plain /></td>
-							</tr>
-						</table>
-					</summary>
-					<form ng-submit="players.add(this)" class="has-feedback">
-					  <input ng-model="player" required tabindex="1" onclick="this.select()" plain class="form-control" placeholder="Add Player" />
+					<button class="btn btn-primary btn-block" data-toggle="collapse" data-target="players>form">Toggle Player(s) List</button>
+					<form ng-repeat="player in players | filter:'!null' track by $index" class="has-feedback collapse">
+					  <input ng-model="player.name" ng-blur="player.name.length ? null:players.remove(this)" tabindex="1" onclick="this.select()" plain class="form-control" />
+					  <button class="glyphicon glyphicon-remove" ng-click="players.remove(this)"></button>
+					</form>
+					<form ng-submit="players.add(this)" class="has-feedback collapse">
+					  <input ng-model="player" ng-blur="player ? players.add(this):null" required tabindex="1" onclick="this.select()" plain class="form-control" placeholder="Add Player" />
 						<button type="reset" class="glyphicon glyphicon-remove"></button>
 					</form>
-					<form ng-repeat="player in players track by $index" class="has-feedback">
-					  <input ng-model="player.name" ng-blur="!player.name.length ? players.remove(this) : null" tabindex="1" onclick="this.select()" plain class="form-control" />
-						<button class="glyphicon glyphicon-remove" ng-click="players.remove(this)"></button>
-					</form>
+					<table class="table table-striped">
+						<tr>
+							<td class="text-right"> Players:</td>
+							<td><input ng-model="players.length" type="number" min="0" tabindex="2" onclick="this.select()" plain /></td>
+						</tr>
+						<tr>
+							<td class="text-right"> Decks:</td>
+							<td><input ng-model="decks" type="number" min="1" tabindex="2" onclick="this.select()" plain />( -{{cards.total % cards.hands}} )</td>
+						</tr>
+						<tr>
+							<td class="text-right"> Hands:</td>
+						  	<td>{{cards.hands}}</td>
+						</tr>
+						<tr>
+							<td class="text-right"> Include:</td>
+						  	<td><input ng-model="include" min="0" tabindex="2" onclick="this.select()" plain /></td>
+						</tr>
+					</table>
 				</players>
-				<deck class="col-xs-12 col-sm-9">
+				<button class="btn btn-primary col-xs-12 col-sm-9" data-toggle="collapse" data-target="deck">Open Deck(s)</button>
+				<deck class="col-xs-12 col-sm-9 collapse">
 					<card ng-repeat="card in cards.extras.concat(cards.stack)" card="{{card.sym}}{{card.symbol}}" color="{{card.color}}" ng-disabled="{{card.extra}}"></card>
-					<button class="btn btn-block btn-primary" ng-click="shuffle()">Shuffle</button>
+					<button class="btn btn-primary btn-block" ng-click="shuffle()">Shuffle</button>
 				</deck>
 			</div>
 		</div>
@@ -123,6 +123,7 @@
 												delete localStorage.kalitiri_Players;
 												delete localStorage.kalitiri_Decks;
 												delete localStorage.kalitiri_Include;
+												location.reload();
 											};
 
 						$scope.$watch('[players, decks, include]', function (newVal, oldVal, scope) {
