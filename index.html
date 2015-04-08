@@ -64,7 +64,7 @@
 					</form>
 				</players>
 				<deck class="col-xs-12 col-sm-9">
-					<card ng-repeat="card in cards.stack.concat(cards.extras)" card="{{card.sym}}{{card.symbol}}" color="{{card.color}}" ng-disabled="{{card.extra}}"></card>
+					<card ng-repeat="card in cards.extras.concat(cards.stack)" card="{{card.sym}}{{card.symbol}}" color="{{card.color}}" ng-disabled="{{card.extra}}"></card>
 					<button class="btn btn-block btn-primary" ng-click="shuffle()">Shuffle</button>
 				</deck>
 			</div>
