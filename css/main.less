@@ -1,6 +1,7 @@
 input {
 	& + *[class*=remove] { position: absolute; right: 0; height: 100%; width: 50px; background-color: transparent; border: 1px solid transparent; z-index: 2; vertical-align: middle; cursor: pointer; }
-	&[plain] { background: transparent; border: 0; box-shadow: none; outline: none; }
+	&[plain],
+	&[readonly] { background: transparent; border: 0; box-shadow: none; outline: none; }
 	&[required]:not(:valid) + .glyphicon { display: none; }
 }
 
