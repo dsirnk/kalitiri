@@ -1,5 +1,5 @@
 input {
-	& + *[class*=remove] { position: absolute; right: 0; height: 100%; width: 50px; background-color: transparent; border: 1px solid transparent; z-index: 2; vertical-align: middle; cursor: pointer; }
+	& + *[class*=remove] { position: absolute; right: 0; height: 100%; opacity: .25; background-color: transparent; border: 1px solid transparent; z-index: 1; vertical-align: middle; cursor: pointer; }
 	&[plain],
 	&[readonly] { background: transparent; border: 0; box-shadow: none; outline: none; }
 	&[required]:not(:valid) + .glyphicon { display: none; }
@@ -9,13 +9,26 @@ input {
 	margin: 0 -15px 15px;
 	&>span.pull-right { padding: 5px 0; }
 }
-deck { text-align: center; }
-card {
-	display: inline-block; width: 80px; height: 120px; margin: -90px 15px 0 -65px; position: relative; top: 100px; left: 40px; background: ivory; border: 1px solid black; border-radius: 5px; padding: 0; text-align: left;
-	&[color=red] { color: red; border-color: red; }
-	&[disabled] { background: grey; color: lightgrey; border-color: lightgrey; opacity: .75; }
-	&:before,
-	&:after { display: block; content: attr(card); padding: 5px; }
-	&:after { margin-top: 70%; transform: rotateZ(180deg); }
-	&~button { margin-top: 110px; }
+
+.nobr {
+	display: block; overflow-x: auto; margin-bottom: 15px; white-space: nowrap;
+	&>* { display: inline-block; vertical-align: bottom; width: 75px; }
+}
+
+scoreboard {
+	.nobr;
+	player form { position: relative; }
+	score { display: block; width: 50%; margin: auto; background: darkcyan; }
+}
+
+deck {
+	.nobr;
+	card {
+		position: relative; left: 45px; margin-left: -45px; background: ivory; border: 1px solid black; border-radius: 5px;
+		&[color=red] { color: red; border-color: red; }
+		&[disabled] { background: grey; color: lightgrey; border-color: lightgrey; opacity: .75; }
+		&:before,
+		&:after { display: block; content: attr(card); padding: 5px; }
+		&:after { margin-top: 70%; transform: rotateZ(180deg); }
+	}
 }

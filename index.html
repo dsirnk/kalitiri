@@ -24,49 +24,58 @@
 
 		<script src="js/vendor/modernizr-2.8.3-respond-1.4.2.min.js"></script>
 	</head>
-	<body ng-controller="MainCtrl">
+	<body ng-controller="MainCtrl" ng-cloak>
 		<div class="container">
 			<nav class="navbar navbar-inverse">
-				<a class="navbar-brand" href="#">Kalitiri</a>
+				<a class="navbar-brand" tabindex="-1" href="#">Kalitiri</a>
 				<span class="pull-right">
 					<a class="btn glyphicon glyphicon-off" ng-click="reset()"></a>
 				</span>
 			</nav>
 			<div class="row">
-				<players class="col-xs-12 col-sm-3">
-					<button class="btn btn-primary btn-block" data-toggle="collapse" data-target="players>form">Toggle Player(s) List</button>
-					<form ng-repeat="player in players | filter:'!null' track by $index" class="has-feedback collapse">
-					  <input ng-model="player.name" ng-blur="player.name.length ? null:players.remove(this)" tabindex="1" onclick="this.select()" plain class="form-control" />
-					  <button class="glyphicon glyphicon-remove" ng-click="players.remove(this)"></button>
-					</form>
-					<form ng-submit="players.add(this)" class="has-feedback collapse">
-					  <input ng-model="player" ng-blur="player ? players.add(this):null" required tabindex="1" onclick="this.select()" plain class="form-control" placeholder="Add Player" />
-						<button type="reset" class="glyphicon glyphicon-remove"></button>
-					</form>
+				<players class="col-xs-12 col-md-3 col-sm-4">
 					<table class="table table-striped">
 						<tr>
-							<td class="text-right"> Players:</td>
-							<td><input ng-model="players.length" type="number" min="0" tabindex="2" onclick="this.select()" plain /></td>
+							<td colspan="2">
+								<form ng-submit="players.add(this)" class="has-feedback">
+									<input ng-model="player" ng-blur="player?players.add(this):null" required onclick="this.select()" plain class="form-control" placeholder="Add {{players.length + 1 + (['st','nd','rd'][players.length % 10] || 'th')}} Player" />
+									<button type="reset" class="glyphicon glyphicon-remove"></button>
+								</form>
+							</td>
 						</tr>
 						<tr>
-							<td class="text-right"> Decks:</td>
-							<td><input ng-model="decks" type="number" min="1" tabindex="2" onclick="this.select()" plain />( -{{cards.total % cards.hands}} )</td>
+							<td class="text-right">Decks:</td>
+							<td><input ng-model="decks" type="number" min="1" onclick="this.select()" plain />( -{{cards.extra}} )</td>
 						</tr>
 						<tr>
-							<td class="text-right"> Hands:</td>
+							<td class="text-right">Hands:</td>
 						  	<td>{{cards.hands}}</td>
-						</tr>
-						<tr>
-							<td class="text-right"> Include:</td>
-						  	<td><input ng-model="include" min="0" tabindex="2" onclick="this.select()" plain /></td>
 						</tr>
 					</table>
 				</players>
-				<button class="btn btn-primary col-xs-12 col-sm-9" data-toggle="collapse" data-target="deck">Open Deck(s)</button>
-				<deck class="col-xs-12 col-sm-9 collapse">
-					<card ng-repeat="card in cards.extras.concat(cards.stack)" card="{{card.sym}}{{card.symbol}}" color="{{card.color}}" ng-disabled="{{card.extra}}"></card>
-					<button class="btn btn-primary btn-block" ng-click="shuffle()">Shuffle</button>
-				</deck>
+				<div class="col-xs-12 col-md-9 col-sm-8">
+					<scoreboard>
+						<player ng-repeat="player in players track by $index">
+							<score ng-style="{height:'{{player.score}}px'}"></score>
+							<form>
+								<input ng-model="player.name" onclick="this.select()" plain class="form-control" />
+								<button class="glyphicon glyphicon-remove" ng-click="players.remove(this)"></button>
+							</form>
+						</player>
+					</scoreboard>
+					<deck><card ng-repeat="card in cards.stack.concat(cards.extras)" card="{{card.sym}}{{card.symbol}}" color="{{card.color}}" ng-disabled="{{card.extra}}"></card></deck>
+				</div>
+			</div>
+			<div class="row">
+				<dashboard class="col-xs-12 col-md-3 col-sm-4">
+					<table class="table table-striped">
+						<tr>
+							<td colspan="2">
+								<h4 class="text-center">{{date.toLocaleDateString()}}</h4>
+							</td>
+						</tr>
+					</table>
+				</dashboard>
 			</div>
 		</div>
 		<script src="js/vendor/jquery-1.11.2.min.js"></script>
@@ -80,6 +89,24 @@
 				angular
 					.module('kalitiri', [])
 					.controller('MainCtrl', function($scope) {
+						// Players
+
+						$scope.players  = 	(function() {
+												return angular.extend(angular.fromJson(localStorage.kalitiri_Players || '[]'), {
+													add   : function(p) {
+														if (!isNaN(players = parseInt(p.player))) {
+															this.length = 0;
+															while(players) { this.push({ name: '', score: 0 }); players--; }
+														}
+														else this.push({ name: p.player, score: 0 });
+														p.player = '';
+													},
+													remove: function(p) { this.splice(this.indexOf(p.player), 1); }
+												});
+											})();
+
+						// Cards
+
 						var suits 		= 	[
 												{ 'symbol':'♠', 'suit': 'spades',   'color':'black' },
 												{ 'symbol':'♥', 'suit': 'hearts',   'color':'red'   },
@@ -88,46 +115,42 @@
 											];
 						suits.cards 	= 	13;
 
-						$scope.players  = 	(function() {
-												return angular.extend(angular.fromJson(localStorage.kalitiri_Players || '[]'), {
-													add   : function(p) { this.push({ name: p.player }); p.player = ''; },
-													remove: function(p) { this.splice(this.indexOf(p.player), 1); }
-												});
-											})();
-						$scope.include  =   localStorage.kalitiri_Include || 'A,3s';
+						$scope.log 		= 	function(s) { console.log(s); };
 						$scope.decks    =   parseInt(localStorage.kalitiri_Decks || 1);
 						$scope.cards    =   function() {
-												$scope.cards.total = suits.cards * suits.length * ($scope.decks || 1);
-												$scope.cards.hands = Math.floor($scope.cards.total / ($scope.players.length || 1));
+												var total = suits.cards * suits.length * ($scope.decks || 1),
+													stack = total - ($scope.cards.extra = total % ($scope.players.length || 1));
+												$scope.cards.hands = stack / ($scope.players.length || 1);
 
 												$scope.cards.stack  = [];
 												$scope.cards.extras = [];
-												for(var weight = 1, extra = $scope.cards.total % $scope.cards.hands; weight <= suits.cards; weight++)
-												for(var suit = 0, sym = ({ '1':'A','11':'J','12':'Q','13':'K' }[weight] || weight); suit < suits.length; suit++)
+												for(var weight = suits.cards + 1; weight > 1; weight--)
+												for(var suit = 0, sym = ({ '11':'J','12':'Q','13':'K','14':'A' }[weight] || weight); suit < suits.length; suit++)
 												for(var deck = 0; deck < $scope.decks; deck++) {
-													var inStack = ~($scope.include + ',').indexOf(sym + ',') ? true
-																: ~($scope.include + ',').indexOf(sym + suits[suit].suit[0]) ? true
-																: extra-- < 1;
-													$scope.cards[inStack ? 'stack' : 'extras'].push(angular.extend(
-														{
-															weight : weight,
+													$scope.cards[(inStack = $scope.cards.stack.length < stack) ? 'stack' : 'extras']
+														.push(angular.extend({
+															weight : weight%14 || 1,
 															sym    : sym,
 															extra  : !(inStack)
-														},
-														suits[suit]
-													));
+														}, 	suits[suit]));
 												}
 											};
 						$scope.shuffle 	=	function() { $scope.cards.stack.sort(function() { return 0.5 - Math.random(); }); };
 						$scope.reset 	=	function() {
 												delete localStorage.kalitiri_Players;
 												delete localStorage.kalitiri_Decks;
-												delete localStorage.kalitiri_Include;
 												location.reload();
 											};
 
-						$scope.$watch('[players, decks, include]', function (newVal, oldVal, scope) {
-						    angular.extend(localStorage, { kalitiri_Players  : angular.toJson(newVal[0]), kalitiri_Decks : newVal[1], kalitiri_Include : newVal[2] });
+						// Kalitiri
+
+						$scope.date 	=	new Date();
+						$scope.points	=	function() {
+												$scope.cards.stack.reduce(function() {});
+											}
+
+						$scope.$watch('[players, decks]', function (newVal, oldVal, scope) {
+						    angular.extend(localStorage, { kalitiri_Players  : angular.toJson(newVal[0]), kalitiri_Decks : newVal[1] });
 						    $scope.cards();
 						}, true);
 						$scope.cards();
