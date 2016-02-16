@@ -35,13 +35,13 @@
 				</span>
 			</nav>
 			<div class="row">
-				<players class="col-xs-12 col-md-3 col-sm-4">
+				<players class="col-xs-12 col-md-3 col-sm-4" ng-show="isCards">
 					<table class="table table-striped">
-						<tr ng-show="isCards">
+						<tr>
 							<td class="text-right">Decks:</td>
 							<td><input ng-model="decks" type="number" min="1" onclick="this.select()" plain />( -{{cards.extra}} )</td>
 						</tr>
-						<tr ng-show="isCards">
+						<tr>
 							<td class="text-right">Hands:</td>
 						  	<td>{{cards.hands}}</td>
 						</tr>
