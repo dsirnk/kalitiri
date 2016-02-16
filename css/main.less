@@ -1,5 +1,8 @@
 input {
-	& + *[class*=remove] { position: absolute; right: 0; height: 100%; opacity: .25; background-color: transparent; border: 1px solid transparent; z-index: 1; vertical-align: middle; cursor: pointer; }
+	& + .close {
+		position: absolute; top: 0; right: 5px; height: 100%; z-index: 2;
+		&:before { content: '\00d7'; }
+	}
 	&[plain],
 	&[readonly] { background: transparent; border: 0; box-shadow: none; outline: none; }
 	&[required]:not(:valid) + .glyphicon { display: none; }
@@ -10,9 +13,10 @@ input {
 	&>span.pull-right { padding: 5px 0; }
 }
 
+.nowrap { white-space: nowrap; }
 .nobr {
-	display: block; overflow-x: auto; margin-bottom: 15px; white-space: nowrap;
-	&>* { display: inline-block; vertical-align: bottom; width: 75px; }
+	display: block; overflow-x: auto; margin-bottom: 15px;
+	&>* { display: inline-block; vertical-align: bottom; }
 }
 
 scoreboard {
@@ -24,7 +28,7 @@ scoreboard {
 deck {
 	.nobr;
 	card {
-		position: relative; left: 45px; margin-left: -45px; background: ivory; border: 1px solid black; border-radius: 5px;
+		position: relative; width: 75px; left: 45px; margin-left: -45px; background: ivory; border: 1px solid black; border-radius: 5px;
 		&[color=red] { color: red; border-color: red; }
 		&[disabled] { background: grey; color: lightgrey; border-color: lightgrey; opacity: .75; }
 		&:before,

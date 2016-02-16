@@ -30,6 +30,8 @@
 				<a class="navbar-brand" tabindex="-1" href="#">Kalitiri</a>
 				<span class="pull-right">
 					<a class="btn glyphicon glyphicon-off" ng-click="reset()"></a>
+					<a class="btn glyphicon glyphicon-book" ng-click="isCards = (storage.game_Cards = !isCards)" ng-class="{ 'btn-info': isCards }"></a>
+					<a class="btn glyphicon glyphicon-equalizer" ng-click="isCol = (storage.game_View = !isCol)" ng-class="'glyphicon-' + (isCol ? 'th-large' : 'stats')"></a>
 				</span>
 			</nav>
 			<div class="row">
@@ -37,33 +39,33 @@
 					<table class="table table-striped">
 						<tr>
 							<td colspan="2">
-								<form ng-submit="players.add(this)" class="has-feedback">
+								<form ng-submit="players.add(this)" class="input-group has-feedback">
 									<input ng-model="player" ng-blur="player?players.add(this):null" required onclick="this.select()" plain class="form-control" placeholder="Add {{players.length + 1 + (['st','nd','rd'][players.length % 10] || 'th')}} Player" />
-									<button type="reset" class="glyphicon glyphicon-remove"></button>
+									<button type="reset" class="close"></button>
 								</form>
 							</td>
 						</tr>
-						<tr>
+						<tr ng-show="isCards">
 							<td class="text-right">Decks:</td>
 							<td><input ng-model="decks" type="number" min="1" onclick="this.select()" plain />( -{{cards.extra}} )</td>
 						</tr>
-						<tr>
+						<tr ng-show="isCards">
 							<td class="text-right">Hands:</td>
 						  	<td>{{cards.hands}}</td>
 						</tr>
 					</table>
 				</players>
 				<div class="col-xs-12 col-md-9 col-sm-8">
-					<scoreboard>
+					<scoreboard ng-class="{ 'nowrap': isCol }">
 						<player ng-repeat="player in players track by $index">
 							<score ng-style="{height:'{{player.score}}px'}"></score>
-							<form>
+							<form class="has-feedback">
 								<input ng-model="player.name" onclick="this.select()" plain class="form-control" />
-								<button class="glyphicon glyphicon-remove" ng-click="players.remove(this)"></button>
+								<button class="close" ng-click="players.remove(this)"></button>
 							</form>
 						</player>
 					</scoreboard>
-					<deck><card ng-repeat="card in cards.stack.concat(cards.extras)" card="{{card.sym}}{{card.symbol}}" color="{{card.color}}" ng-disabled="{{card.extra}}"></card></deck>
+					<deck ng-show="isCards" ng-class="{ 'nowrap': isCol }"><card ng-repeat="card in cards.stack.concat(cards.extras)" card="{{card.sym}}{{card.symbol}}" color="{{card.color}}" ng-disabled="{{card.extra}}"></card></deck>
 				</div>
 			</div>
 			<div class="row">
@@ -89,10 +91,13 @@
 				angular
 					.module('kalitiri', [])
 					.controller('MainCtrl', function($scope) {
+						$scope.storage	=	localStorage;
+						$scope.isCol   =	localStorage.game_View == 'true';
+						$scope.isCards  =	localStorage.game_Cards == 'true' || true;
 						// Players
 
 						$scope.players  = 	(function() {
-												return angular.extend(angular.fromJson(localStorage.kalitiri_Players || '[]'), {
+												return angular.extend(angular.fromJson(localStorage.game_Players || '[]'), {
 													add   : function(p) {
 														if (!isNaN(players = parseInt(p.player))) {
 															this.length = 0;
@@ -106,7 +111,7 @@
 											})();
 
 						// Cards
-
+						
 						var suits 		= 	[
 												{ 'symbol':'♠', 'suit': 'spades',   'color':'black' },
 												{ 'symbol':'♥', 'suit': 'hearts',   'color':'red'   },
@@ -116,8 +121,8 @@
 						suits.cards 	= 	13;
 
 						$scope.log 		= 	function(s) { console.log(s); };
-						$scope.decks    =   parseInt(localStorage.kalitiri_Decks || 1);
-						$scope.cards    =   function() {
+						$scope.decks	=   parseInt(localStorage.game_Decks || 1);
+						$scope.cards	=   function() {
 												var total = suits.cards * suits.length * ($scope.decks || 1),
 													stack = total - ($scope.cards.extra = total % ($scope.players.length || 1));
 												$scope.cards.hands = stack / ($scope.players.length || 1);
@@ -137,8 +142,8 @@
 											};
 						$scope.shuffle 	=	function() { $scope.cards.stack.sort(function() { return 0.5 - Math.random(); }); };
 						$scope.reset 	=	function() {
-												delete localStorage.kalitiri_Players;
-												delete localStorage.kalitiri_Decks;
+												delete localStorage.game_Players;
+												delete localStorage.game_Decks;
 												location.reload();
 											};
 
@@ -150,8 +155,8 @@
 											}
 
 						$scope.$watch('[players, decks]', function (newVal, oldVal, scope) {
-						    angular.extend(localStorage, { kalitiri_Players  : angular.toJson(newVal[0]), kalitiri_Decks : newVal[1] });
-						    $scope.cards();
+							angular.extend(localStorage, { game_Players  : angular.toJson(newVal[0]), game_Decks : newVal[1] });
+							$scope.cards();
 						}, true);
 						$scope.cards();
 					});
