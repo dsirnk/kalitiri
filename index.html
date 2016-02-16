@@ -37,14 +37,6 @@
 			<div class="row">
 				<players class="col-xs-12 col-md-3 col-sm-4">
 					<table class="table table-striped">
-						<tr>
-							<td colspan="2">
-								<form ng-submit="players.add(this)" class="input-group has-feedback">
-									<input ng-model="player" ng-blur="player?players.add(this):null" required onclick="this.select()" plain class="form-control" placeholder="Add {{players.length + 1 + (['st','nd','rd'][players.length % 10] || 'th')}} Player" />
-									<button type="reset" class="close"></button>
-								</form>
-							</td>
-						</tr>
 						<tr ng-show="isCards">
 							<td class="text-right">Decks:</td>
 							<td><input ng-model="decks" type="number" min="1" onclick="this.select()" plain />( -{{cards.extra}} )</td>
@@ -59,13 +51,18 @@
 					<scoreboard ng-class="{ 'nowrap': isCol }">
 						<player ng-repeat="player in players track by $index">
 							<score ng-style="{height:'{{player.score}}px'}"></score>
-							<form class="has-feedback">
+							<form class="input-group has-feedback">
 								<input ng-model="player.name" onclick="this.select()" plain class="form-control" />
 								<button class="close" ng-click="players.remove(this)"></button>
 							</form>
 						</player>
+						<player>
+							<form ng-submit="players.add(this)" class="input-group">
+								<input ng-model="player" ng-blur="player?players.add(this):null" required onclick="this.select()" plain class="form-control" placeholder="Add {{players.length + 1 + (['st','nd','rd'][players.length % 10] || 'th')}} Player" />
+							</form>
+						</player>
 					</scoreboard>
-					<deck ng-show="isCards" ng-class="{ 'nowrap': isCol }"><card ng-repeat="card in cards.stack.concat(cards.extras)" card="{{card.sym}}{{card.symbol}}" color="{{card.color}}" ng-disabled="{{card.extra}}"></card></deck>
+					<deck ng-show="isCards" ng-class="{ 'nowrap': isCol }"><card ng-repeat="card in cards.extras.concat(cards.stack)" card="{{card.sym}}{{card.symbol}}" color="{{card.color}}" ng-disabled="{{card.extra}}"></card></deck>
 				</div>
 			</div>
 			<div class="row">
@@ -102,8 +99,7 @@
 														if (!isNaN(players = parseInt(p.player))) {
 															this.length = 0;
 															while(players) { this.push({ name: '', score: 0 }); players--; }
-														}
-														else this.push({ name: p.player, score: 0 });
+														} else this.push({ name: p.player, score: 0 });
 														p.player = '';
 													},
 													remove: function(p) { this.splice(this.indexOf(p.player), 1); }
